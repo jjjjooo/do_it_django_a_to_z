@@ -5,11 +5,11 @@ from django.views.generic import ListView, DetailView
 
 class PostList(ListView):
     model = Post
-    template_name = 'blog/index.html'
+    template_name = 'blog/post_list.html'
     ordering = '-pk'
 
 class PostDetail(DetailView):
-    model=Post
+    model = Post
 # def index(request):
 #     posts = Post.objects.all().order_by('-pk')
 #
