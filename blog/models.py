@@ -13,6 +13,9 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = 'Categories'
 
+    def get_absolute_url(self):
+        return f'/blog/category/{self.slug}/'
+
 
 class Post(models.Model):
     title = models.CharField(max_length=30)
@@ -41,3 +44,4 @@ class Post(models.Model):
 
     def get_file_ext(self):
         return self.get_file_name().split('.')[-1]
+
