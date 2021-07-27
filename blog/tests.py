@@ -111,27 +111,27 @@ class TestView(TestCase):
             author=self.user_trump,
         )
         # 1.2 그 포스트의 URL은 '/blog/1'이다.
-        self.assertEqual(post_000.get_absolute_url(), '/blog/1')
+        self.assertEqual(self.post_001.get_absolute_url(), '/blog/1')
 
         #2. 첫 번째 포스트의 상세 페이지 테스트
         #2.1 첫 번째 포스트의 url로 접근하면 정상적으로 작동한다(status_code :200).
-        response = self.client.get(post_000.get_absolute_url())
-        self.assertEqual(response.status_code, 301)
+        response = self.client.get(self.post_001.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, 'html.parser')
         #2.2 포스트 목록 페이지와 똑같은 내비게이션 바가 있다.
-        navbar = soup.nav
-        self.assertIn('Blog', navbar.text)
-        self.assertIn('About me', navbar.text)
-        #2.3 첫 번째 포스트의 제목이 웹 브라우저 탭 타이틀에 들어 있다.
-        self.assertIn(post_000.title, soup.title.text)
+
+        self.navbar_test(soup)
+        self.category_card_test(soup)
+        self.assertIn(self.post_001.title, soup.title.text)
+
 
 
         #2.4 첫 번재 포스트의 제목이 포스트 영역에 있다.
         main_area = soup.find('div', id='main-area')
         post_area = main_area.find('div', id='post-area')
-        self. asssertIn(post_000, post_area.text)
+        self. asssertIn(self.post_001, post_area.text)
         #2.5 첫 번째 포스트이 작성(author)가 포스트 영역에 있다.(아직 구현할 수 없음)
-        self.assertIn(self.user_trump.username.upper(), post_area.text)
+        self.assertIn(self.category_programming.name, post_area.text)
 
-        #2.6 첫 번째 포스트의 내용(content)의 포스트 영역에 있다.
-        self.assertIn(post_000.content, post_area.text)
+        self.assertIn(self.user_trump.username.upper(), post_area.text)
+        self.assertIn(self.post_001.content, post_area.text)
