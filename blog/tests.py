@@ -22,7 +22,7 @@ class TestView(TestCase):
             title='첫번째 포스트입니다.',
             content='Hello World. We are the world.',
             category=self.category_programming,
-            author=self.user_trump
+            author=self.user_trump,
         )
         self.post_001.tags.add(self.tag_hello)
 
@@ -30,16 +30,47 @@ class TestView(TestCase):
             title='두번째 포스트입니다.',
             content='1등이 전부는 아니잖아요?',
             category=self.category_music,
-            author=self.user_obama
+            author=self.user_obama,
         )
 
         self.post_003 = Post.objects.create(
-            title='뭘봐 시발',
+            title='Post Form 만들기',
             content='카테고리가 없다',
             author=self.user_trump,
         )
         self.post_003.tags.add(self.tag_python_kor)
         self.post_003.tags.add(self.tag_python)
+
+
+    def test_create_post(self):
+
+        # 로그아웃 상태
+        response = self.client.get('/blog/create_post/')
+        # 로그인 상태
+        self.client.login(username='trump', password='somepassword')
+
+        response = self.client.get('/blog/create_post/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        self.assertEqual('Create Post - Blog', soup.title.text)
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('Create New Post', main_area.text)
+
+        self.client.post(
+            '/blog/create_post/',
+            {
+                'title': 'Post Form 만들기',
+                'content': "Post Form 페이지를 만듭시다.",
+            }
+        )
+        last_post = Post.objects.last()
+        self.assertEqual(last_post.title, 'Post Form 만들기')
+        self.assertEqual(last_post.author.username, 'trump')
+
+
     def test_category_page(self):
         response = self.client.get(self.category_programming.get_absolute_url())
         self.assertEqual(response.status_code, 200)
@@ -68,7 +99,7 @@ class TestView(TestCase):
 
         self.assertIn(f'{self.category_music.name} ({self.category_music.post_set.count()}',
                       categories_card.text)
-        self.assertIn(f'미분류 (1)', categories_card.text)
+        self.assertIn(f'미분류', categories_card.text)
 
     def navbar_test(self, soup):
         navbar = soup.nav
@@ -157,6 +188,9 @@ class TestView(TestCase):
         self.assertNotIn(self.post_002.title, main_area.text)
         self.assertNotIn(self.post_003.title, main_area.text)
 
+
+
+
     def test_post_detail(self):
         # 1.1 포스트가 하나 있다.
         post_000 = Post.objects.create(
@@ -165,7 +199,7 @@ class TestView(TestCase):
             author=self.user_trump,
         )
         # 1.2 그 포스트의 URL은 '/blog/1'이다.
-        self.assertEqual(self.post_001.get_absolute_url(), '/blog/1')
+        self.assertEqual(self.post_001.get_absolute_url(), '/blog/1/')
 
         #2. 첫 번째 포스트의 상세 페이지 테스트
         #2.1 첫 번째 포스트의 url로 접근하면 정상적으로 작동한다(status_code :200).
@@ -183,9 +217,9 @@ class TestView(TestCase):
         #2.4 첫 번재 포스트의 제목이 포스트 영역에 있다.
         main_area = soup.find('div', id='main-area')
         post_area = main_area.find('div', id='post-area')
-        self. asssertIn(self.post_001, post_area.text)
+        self.assertIn(self.post_001.title, post_area.text)
         self.assertIn(self.tag_hello.name, post_area.text)
-        self.assertNonIn(self.tag_python.name, post_area.text)
+        self.assertNotIn(self.tag_python.name, post_area.text)
         self.assertNotIn(self.tag_python_kor.name, post_area.text)
         #2.5 첫 번째 포스트이 작성(author)가 포스트 영역에 있다.(아직 구현할 수 없음)
         self.assertIn(self.category_programming.name, post_area.text)
